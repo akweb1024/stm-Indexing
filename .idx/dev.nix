@@ -2,46 +2,52 @@
 # see: https://developers.google.com/idx/guides/customize-idx-env
 { pkgs, ... }: {
   # Which nixpkgs channel to use.
-  channel = "stable-25.05";
+  channel = "stable-23.11"; # Using a known stable channel
+
   # Use https://search.nixos.org/packages to find packages
-  packages = [ pkgs.nodejs_18 ];
+  packages = [
+    pkgs.nodejs_18
+    pkgs.firebase-tools # Added firebase-tools for firebase CLI commands
+  ];
+
   # Sets environment variables in the workspace
-  env = { EXPO_USE_FAST_RESOLVER = 1; };
+  env = {
+    EXPO_USE_FAST_RESOLVER = "1";
+  };
+
   idx = {
     # Search for the extensions you want on https://open-vsx.org/ and use "publisher.id"
     extensions = [
-      "msjsdiag.vscode-react-native"
+      "msjsdiag.vscode-react-native",
+      "dbaeumer.vscode-eslint" # for linting
     ];
+
     workspace = {
       # Runs when a workspace is first created with this `dev.nix` file
       onCreate = {
-        install =
-          "npm ci --prefer-offline --no-audit --no-progress --timing && npm i @expo/ngrok@^4.1.0 react@latest react-dom@latest react-native@latest && npm i -D @types/react@latest";
+        npm-install = "npm install";
+        # also install dependencies for functions
+        npm-install-functions = "cd functions && npm install && cd ..";
       };
-      # Runs when a workspace restarted
+
+      # Runs when the workspace is started
       onStart = {
-        android = ''
-          echo -e "\033[1;33mWaiting for Android emulator to be ready...\033[0m"
-          # Wait for the device connection command to finish
-          adb -s emulator-5554 wait-for-device && \
-          npm run android -- --tunnel
-        '';
+        # check firebase version
+        firebase-version = "firebase --version";
       };
     };
-    # Enable previews and customize configuration
+
+    # Defines the previews shown in the IDX workspace
     previews = {
       enable = true;
-      previews = {
-        web = {
-          command = [ "npm" "run" "web" "--" "--port" "$PORT" "--host" "0.0.0.0" ];
-          manager = "web";
-        };
-        android = {
-          # noop
-          command = [ "tail" "-f" "/dev/null" ];
-          manager = "web";
-        };
-      };
+      previews = [
+        {
+          id = "web";
+          label = "Web App";
+          port = 5173;
+          command = ["npm", "run", "dev"];
+        }
+      ];
     };
   };
 }
