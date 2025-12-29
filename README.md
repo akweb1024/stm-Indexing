@@ -1,53 +1,56 @@
-> Edited for use in IDX on 07/09/12
+# STM Journal Indexing & Intelligence Suite
 
-# Welcome to your Expo app 👋
+This is a secure, modular, multi-tenant indexing management system for STM Journals.
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+## Local Development Setup
 
-## Get started
+### Prerequisites
+- Node.js (v18+)
+- Java JDK (for Firebase Emulator Suite)
+- Firebase CLI
 
-#### Android
+### Installation
+1. Clone the repository.
+2. Install root dependencies: `npm install`
+3. Install functions dependencies: `cd functions && npm install && cd ..`
 
-Android previews are defined as a `workspace.onStart` hook and started as a vscode task when the workspace is opened/started.
+### Firebase Emulator Setup
+1. **Initialize Firebase:**
+   ```bash
+   firebase init
+   ```
+   - Select "Use an existing project" and choose your Firebase project.
+   - Select Functions and Firestore.
+   - Do NOT overwrite any files.
 
-Note, if you can't find the task, either:
-- Rebuild the environment (using command palette: `IDX: Rebuild Environment`), or
-- Run `npm run android -- --tunnel` command manually run android and see the output in your terminal. The device should pick up this new command and switch to start displaying the output from it.
+2. **Configure Emulator:**
+   ```bash
+   firebase setup:emulators:firestore
+   firebase setup:emulators:pubsub
+   firebase setup:emulators:storage
+   firebase setup:emulators:auth
+   ```
+3. **Start Emulator Suite:**
+   ```bash
+   firebase emulators:start --import=./seed-data --export-on-exit
+   ```
+   The `--import` flag will load the seed data from `./seed-data`.
 
-In the output of this command/task, you'll find options to open the app in a
+### Running the Application
+1. **Start the frontend:**
+   ```bash
+   npm run dev
+   ```
+2. **Access the app:**
+   - Open your browser to `http://localhost:5173`
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You'll also find options to open the app's developer menu, reload the app, and more.
-
-#### Web
-
-Web previews will be started and managred automatically. Use the toolbar to manually refresh.
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Deployment
+1. **Deploy Functions, Firestore rules, and indexes:**
+   ```bash
+   firebase deploy
+   ```
+2. **Build and deploy the frontend to Firebase Hosting:**
+   ```bash
+   npm run build
+   firebase deploy --only hosting
+   ```

@@ -4,7 +4,7 @@
   # Which nixpkgs channel to use.
   channel = "stable-25.05";
   # Use https://search.nixos.org/packages to find packages
-  packages = [ pkgs.nodejs_20 ];
+  packages = [ pkgs.nodejs_18 ];
   # Sets environment variables in the workspace
   env = { EXPO_USE_FAST_RESOLVER = 1; };
   idx = {
@@ -33,7 +33,7 @@
       enable = true;
       previews = {
         web = {
-          command = [ "npm" "run" "web" "--" "--port" "$PORT" ];
+          command = [ "npm" "run" "web" "--" "--port" "$PORT" "--host" "0.0.0.0" ];
           manager = "web";
         };
         android = {
