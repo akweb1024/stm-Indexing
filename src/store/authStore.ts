@@ -1,8 +1,9 @@
 import { create } from 'zustand';
+import { User } from 'firebase/auth';
 
 interface AuthState {
-  user: any; // You should replace 'any' with a proper user type
-  setUser: (user: any) => void;
+  user: User | null;
+  setUser: (user: User | null) => void;
   logout: () => void;
 }
 

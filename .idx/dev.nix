@@ -7,7 +7,7 @@
   # Use https://search.nixos.org/packages to find packages
   packages = [
     pkgs.nodejs_20
-    # pkgs.firebase-tools # Added firebase-tools for firebase CLI commands
+    pkgs.firebase-tools # Added firebase-tools for firebase CLI commands
   ];
 
   # Sets environment variables in the workspace
@@ -33,7 +33,7 @@
       # Runs when the workspace is started
       onStart = {
         # check firebase version
-        # firebase-version = "firebase --version";
+        firebase-version = "firebase --version";
       };
     };
 
