@@ -14,5 +14,5 @@ export const createDocument = async <T extends DocumentData>(collectionName: str
 
 export const updateDocument = async <T extends DocumentData>(collectionName: string, docId: string, data: Partial<T>) => {
   const docRef = doc(db, collectionName, docId);
-  await updateDoc(docRef, data);
+  await updateDoc(docRef, data as DocumentData);
 };

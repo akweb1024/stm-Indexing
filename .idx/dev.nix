@@ -45,7 +45,7 @@
           id = "web";
           label = "Web App";
           port = 5173;
-          command = [ "npm" "run" "dev" ];
+          command = "npm run dev";
         }
       ];
     };
