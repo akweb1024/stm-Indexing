@@ -2,7 +2,7 @@
 # see: https://developers.google.com/idx/guides/customize-idx-env
 { pkgs, ... }: {
   # Which nixpkgs channel to use.
-  channel = "stable-23.11"; # Using a known stable channel
+  channel = "stable-23.11";
 
   # Use https://search.nixos.org/packages to find packages
   packages = [
@@ -18,7 +18,7 @@
   idx = {
     # Search for the extensions you want on https://open-vsx.org/ and use "publisher.id"
     extensions = [
-      "msjsdiag.vscode-react-native",
+      "msjsdiag.vscode-react-native"
       "dbaeumer.vscode-eslint" # for linting
     ];
 
@@ -45,7 +45,7 @@
           id = "web";
           label = "Web App";
           port = 5173;
-          command = ["npm", "run", "dev"];
+          command = [ "npm" "run" "dev" ];
         }
       ];
     };
