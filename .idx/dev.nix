@@ -11,14 +11,11 @@
   ];
 
   # Sets environment variables in the workspace
-  env = {
-    EXPO_USE_FAST_RESOLVER = "1";
-  };
+  env = {};
 
   idx = {
     # Search for the extensions you want on https://open-vsx.org/ and use "publisher.id"
     extensions = [
-      "msjsdiag.vscode-react-native"
       "dbaeumer.vscode-eslint" # for linting
     ];
 
