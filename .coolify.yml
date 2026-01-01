@@ -1,0 +1,32 @@
+# Coolify Deployment Configuration
+# This file tells Coolify how to build and deploy your application
+
+# Build configuration
+buildCommand: |
+  # Backend build
+  cd backend
+  npm ci
+  npx prisma generate
+  npm run build
+  
+  # Frontend build
+  cd ..
+  npm ci
+  npm run build
+
+# Start command
+startCommand: |
+  cd backend
+  npx prisma migrate deploy
+  node dist/index.js
+
+# Health check
+healthCheckPath: /health
+healthCheckPort: 5050
+
+# Environment variables (set these in Coolify UI)
+# DATABASE_URL
+# JWT_SECRET
+# NODE_ENV=production
+# PORT=5050
+# FRONTEND_URL

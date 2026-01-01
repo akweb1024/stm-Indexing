@@ -1,18 +1,29 @@
-import { doc, getDoc, setDoc, updateDoc, DocumentData } from 'firebase/firestore';
-import { db } from './client';
+const API_URL = 'http://localhost:5050/api';
 
 export const getDocument = async <T>(collectionName: string, docId: string): Promise<T | null> => {
-  const docRef = doc(db, collectionName, docId);
-  const docSnap = await getDoc(docRef);
-  return docSnap.exists() ? (docSnap.data() as T) : null;
+  const response = await fetch(`${API_URL}/${collectionName}/${docId}`);
+  if (!response.ok) return null;
+  return await response.json();
 };
 
-export const createDocument = async <T extends DocumentData>(collectionName: string, docId: string, data: T) => {
-  const docRef = doc(db, collectionName, docId);
-  await setDoc(docRef, data);
+export const getCollection = async <T>(collectionName: string, constraints: any[] = []): Promise<T[]> => {
+  const response = await fetch(`${API_URL}/${collectionName}`);
+  if (!response.ok) return [];
+  return await response.json();
 };
 
-export const updateDocument = async <T extends DocumentData>(collectionName: string, docId: string, data: Partial<T>) => {
-  const docRef = doc(db, collectionName, docId);
-  await updateDoc(docRef, data as DocumentData);
+export const createDocument = async <T>(collectionName: string, docId: string, data: T) => {
+  await fetch(`${API_URL}/${collectionName}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+};
+
+export const updateDocument = async <T>(collectionName: string, docId: string, data: Partial<T>) => {
+  await fetch(`${API_URL}/${collectionName}/${docId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
 };

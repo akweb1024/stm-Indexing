@@ -1,0 +1,103 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String      @id @default(uuid())
+  email        String      @unique
+  password     String
+  displayName  String?
+  role         String      @default("USER") // ADMIN, JOURNAL_MANAGER, EDITOR, AUDITOR
+  tenantId     String
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  auditLogs    AuditLog[]
+}
+
+model Journal {
+  id           String      @id @default(uuid())
+  name         String
+  code         String
+  issn         String?
+  status       String      @default("ACTIVE") // ACTIVE, INACTIVE
+  wordpressUrl String?
+  tenantId     String
+  papers       Paper[]
+  applications DatabaseApplication[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model Paper {
+  id             String      @id @default(uuid())
+  title          String
+  doi            String      @unique
+  authors        String // Stored as comma-separated or JSON string in SQLite
+  journalId      String
+  journal        Journal     @relation(fields: [journalId], references: [id])
+  tenantId       String
+  pubDate        DateTime?
+  indexingStatus String      @default("NOT_INDEXED") // INDEXED, PENDING, NOT_INDEXED
+  scholarUrl     String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+}
+
+model DatabaseConfig {
+  id             String      @id @default(uuid())
+  name           String
+  enabled        Boolean     @default(true)
+  tenantId       String
+  checkFrequency String      @default("WEEKLY")
+  applications   DatabaseApplication[]
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+}
+
+model DatabaseApplication {
+  id               String      @id @default(uuid())
+  journalId        String
+  journal          Journal     @relation(fields: [journalId], references: [id])
+  databaseConfigId String
+  databaseConfig   DatabaseConfig @relation(fields: [databaseConfigId], references: [id])
+  status           String      @default("PENDING") // PENDING, SUBMITTED, UNDER_REVIEW, ACCEPTED, REJECTED
+  appliedDate      DateTime    @default(now())
+  notes            String?
+  tenantId         String
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  @@unique([journalId, databaseConfigId])
+}
+
+model Reviewer {
+  id           String    @id @default(uuid())
+  firstName    String
+  lastName     String
+  email        String    @unique
+  institution  String?
+  expertise    String    // Comma-separated or JSON list: "AI, Machine Learning, NLP"
+  rating       Float     @default(5.0)
+  totalReviews Int       @default(0)
+  tenantId     String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String
+  details   String?
+  tenantId  String
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  timestamp DateTime @default(now())
+}

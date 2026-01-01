@@ -1,13 +1,11 @@
-import { AppBar, Toolbar, Typography, IconButton } from '@mui/material';
-import { AccountCircle, Notifications, Logout } from '@mui/icons-material';
+import { AccountCircle, Logout, Notifications } from '@mui/icons-material';
+import { AppBar, IconButton, Toolbar, Typography } from '@mui/material';
 import { useAuthStore } from '../store/authStore';
-import { auth } from '../firebase/client';
-
 const Topbar = () => {
-  const { user } = useAuthStore();
+  const { user, logout } = useAuthStore();
 
   const handleLogout = () => {
-    auth.signOut();
+    logout();
   };
 
   return (

@@ -1,10 +1,8 @@
 
 
+import { Box, Button, Container, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, TextField, Container, Typography, Box } from '@mui/material';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../../firebase/client';
 import { useAuthStore } from '../../store/authStore';
 
 const LoginPage = () => {
@@ -18,8 +16,20 @@ const LoginPage = () => {
     e.preventDefault();
     setError(null);
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      setUser(userCredential.user);
+      const response = await fetch('http://localhost:5050/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      if (!response.ok) {
+        throw new Error('Login failed');
+      }
+
+      const data = await response.json();
+      setUser(data.user);
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
       navigate('/');
     } catch (error) {
       setError('Failed to login. Please check your credentials.');
