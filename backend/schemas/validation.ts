@@ -61,8 +61,8 @@ export const sendInvitationSchema = z.object({
 
 // Pagination schema
 export const paginationSchema = z.object({
-    page: z.string().regex(/^\d+$/).transform(Number).default('1'),
-    limit: z.string().regex(/^\d+$/).transform(Number).default('20'),
+    page: z.coerce.number().int().positive().default(1),
+    limit: z.coerce.number().int().positive().default(20),
     sortBy: z.string().optional(),
     sortOrder: z.enum(['asc', 'desc']).optional()
 });

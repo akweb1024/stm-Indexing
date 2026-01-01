@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
-import { ZodError } from 'zod';
+import { z, ZodError } from 'zod';
 import { env } from '../config/env';
 import { logger } from '../utils/logger';
 
@@ -33,7 +33,7 @@ export const errorHandler = (
     if (err instanceof ZodError) {
         return res.status(400).json({
             error: 'Validation failed',
-            details: err.errors.map(e => ({
+            details: err.issues.map((e: z.ZodIssue) => ({
                 field: e.path.join('.'),
                 message: e.message
             }))
