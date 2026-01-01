@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
+import path from 'path';
 import { generateToken } from './middleware/auth';
 import { apiLimiter, authLimiter } from './middleware/rateLimiter';
 import { getJournalStats } from './services/analyticsService';
@@ -65,12 +66,21 @@ const logAction = async (action: string, userId: string, tenantId: string, detai
     }
 };
 
-app.get('/', (req, res) => {
-    res.send('STM Indexing Backend is running. Use /api for endpoints.');
+app.get('/api', (req, res) => {
+    res.json({ message: 'STM Journal Indexing API running' });
 });
 
-app.get('/api', (req, res) => {
-    res.json({ message: 'STM Journal Indexing local API running' });
+// Serve static frontend files
+const frontendPath = path.join(__dirname, '../../dist');
+app.use(express.static(frontendPath));
+
+// Handle React routing, return all requests to React app
+app.get('*', (req, res) => {
+    // Skip API routes
+    if (req.path.startsWith('/api')) {
+        return res.status(404).json({ error: 'API endpoint not found' });
+    }
+    res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
 // --- Journals Routes ---

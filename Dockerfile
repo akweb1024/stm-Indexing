@@ -51,6 +51,10 @@ COPY --from=backend-builder --chown=nodejs:nodejs /app/backend/prisma ./backend/
 # Copy frontend build
 COPY --from=frontend-builder --chown=nodejs:nodejs /app/dist ./dist
 
+# Copy start script
+COPY backend/start.sh ./start.sh
+RUN chmod +x ./start.sh
+
 USER nodejs
 
 EXPOSE 5050
@@ -60,4 +64,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
   CMD node -e "require('http').get('http://localhost:5050/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
 # Start the application
-CMD ["node", "backend/dist/index.js"]
+CMD ["./start.sh"]
