@@ -6,13 +6,13 @@ export const getDocument = async <T>(collectionName: string, docId: string): Pro
   return await response.json();
 };
 
-export const getCollection = async <T>(collectionName: string, constraints: any[] = []): Promise<T[]> => {
+export const getCollection = async <T>(collectionName: string): Promise<T[]> => {
   const response = await fetch(`${API_URL}/${collectionName}`);
   if (!response.ok) return [];
   return await response.json();
 };
 
-export const createDocument = async <T>(collectionName: string, docId: string, data: T) => {
+export const createDocument = async <T>(collectionName: string, data: T) => {
   await fetch(`${API_URL}/${collectionName}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
