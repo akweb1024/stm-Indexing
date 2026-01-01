@@ -66,6 +66,24 @@ const logAction = async (action: string, userId: string, tenantId: string, detai
     }
 };
 
+app.get('/health', async (req, res) => {
+    try {
+        // Check database connection
+        await prisma.$queryRaw`SELECT 1`;
+        res.json({
+            status: 'healthy',
+            database: 'connected',
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        res.status(503).json({
+            status: 'unhealthy',
+            database: 'disconnected',
+            error: (error as Error).message
+        });
+    }
+});
+
 app.get('/api', (req, res) => {
     res.json({ message: 'STM Journal Indexing API running' });
 });
