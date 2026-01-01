@@ -4,18 +4,41 @@ const prisma = new PrismaClient();
 async function main() {
     const tenantId = 'tenant_1';
 
-    // 1. Create User
-    const user = await prisma.user.upsert({
-        where: { email: 'test@example.com' },
-        update: {},
-        create: {
-            email: 'test@example.com',
-            password: 'password123',
-            displayName: 'Test Admin',
-            role: 'ADMIN',
-            tenantId: tenantId,
-        },
-    });
+    // 1. Create Users
+    const roles = ['JOURNAL_MANAGER', 'EDITOR', 'AUDITOR', 'USER'];
+
+    // Create 3 Admins
+    for (let i = 1; i <= 3; i++) {
+        await prisma.user.upsert({
+            where: { email: `admin.${i}@test.com` },
+            update: {},
+            create: {
+                email: `admin.${i}@test.com`,
+                password: 'password123',
+                displayName: `Admin ${i}`,
+                role: 'ADMIN',
+                tenantId: tenantId,
+            },
+        });
+    }
+
+    // Create 10 users for each other role
+    for (const role of roles) {
+        for (let i = 1; i <= 10; i++) {
+            const roleName = role.toLowerCase().replace('_', '');
+            await prisma.user.upsert({
+                where: { email: `${roleName}.${i}@test.com` },
+                update: {},
+                create: {
+                    email: `${roleName}.${i}@test.com`,
+                    password: 'password123',
+                    displayName: `${role.replace('_', ' ')} ${i}`,
+                    role: role,
+                    tenantId: tenantId,
+                },
+            });
+        }
+    }
 
     // 2. Create Journals
     const journal1 = await prisma.journal.upsert({
