@@ -1,67 +1,69 @@
 # Use Node.js 20 Alpine for smaller image size
 FROM node:20-alpine AS base
 
-# --- STAGE 1: Dependencies ---
+# Install dependencies only when needed
 FROM base AS deps
 RUN apk add --no-cache libc6-compat openssl
 WORKDIR /app
 
-# Copy package files for both root and backend
-COPY package*.json ./
+# Copy package files
 COPY backend/package*.json ./backend/
+COPY package*.json ./
 
-# Install dependencies - using npm ci for deterministic builds
-# Note: Ensure your package-lock.json is updated locally before pushing!
-RUN npm ci
+# Install dependencies
 RUN cd backend && npm ci
+RUN npm ci
 
-# --- STAGE 2: Backend Builder ---
+# Build backend
 FROM base AS backend-builder
 WORKDIR /app
-# Only copy necessary files for Prisma and building
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/backend/node_modules ./backend/node_modules
 COPY backend ./backend
 
-# Generate Prisma Client (crucial for it to exist in node_modules)
-# Then build the project
-RUN cd backend && npx prisma generate && npm run build
+# Generate Prisma Client and build
+RUN cd backend && ./node_modules/.bin/prisma generate && npm run build
 
-# --- STAGE 3: Frontend Builder ---
+# Build frontend
 FROM base AS frontend-builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-# Ensure we don't carry over the backend source if not needed for frontend build
 RUN npm run build
 
-# --- STAGE 4: Production Runner ---
+# Production image
 FROM base AS runner
-RUN apk add --no-cache curl openssl
 WORKDIR /app
 
 ENV NODE_ENV=production
 ENV PORT=5050
 
-RUN addgroup --system --gid 1001 nodejs && \
-  adduser --system --uid 1001 nodejs
+RUN apk add --no-cache curl
 
-# Copy only what is strictly necessary for production
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nodejs
+
+# Copy backend
 COPY --from=backend-builder --chown=nodejs:nodejs /app/backend/dist ./backend/dist
 COPY --from=backend-builder --chown=nodejs:nodejs /app/backend/node_modules ./backend/node_modules
 COPY --from=backend-builder --chown=nodejs:nodejs /app/backend/package.json ./backend/package.json
 COPY --from=backend-builder --chown=nodejs:nodejs /app/backend/prisma ./backend/prisma
+COPY --from=backend-builder --chown=nodejs:nodejs /app/backend/prisma.config.ts ./backend/prisma.config.ts
 
-# Copy frontend build to the static/public directory served by your backend
+# Copy frontend build
 COPY --from=frontend-builder --chown=nodejs:nodejs /app/dist ./dist
 
+# Copy start script
 COPY backend/start.sh ./start.sh
 RUN chmod +x ./start.sh
 
 USER nodejs
+
 EXPOSE 5050
 
+# Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
-  CMD curl -f http://127.0.0.1:5050/health || exit 1
+    CMD curl -f http://127.0.0.1:5050/health || exit 1
 
+# Start the application
 CMD ["./start.sh"]

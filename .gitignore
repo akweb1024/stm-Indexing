@@ -64,3 +64,8 @@ ecosystem.config.js
 *.backup
 *.bak
 backups/
+
+# Add these to your existing .gitignore to be safe
+backend/node_modules/
+backend/dist/
+backend/prisma/dev.db

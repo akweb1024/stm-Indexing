@@ -3,15 +3,21 @@ set -e
 
 echo "🚀 Starting STM Indexing Platform..."
 
-# Apply database migrations (push schema state)
+# Navigate to backend once to simplify commands
+cd backend
+
+# 1. Apply database migrations
+# Using 'db push' is okay for prototyping, but for production, 
+# 'prisma migrate deploy' is usually preferred.
 echo "📦 Applying database schema..."
-cd backend && ./node_modules/.bin/prisma db push --accept-data-loss && cd ..
+npx prisma db push --accept-data-loss
 
-# Seed the database
+# 2. Seed the database
+# Instead of ts-node, it is faster to run the seed via npx prisma
 echo "🌱 Seeding database..."
-# We allow seeding to fail if it's already seeded, but we log the attempt
-cd backend && ./node_modules/.bin/ts-node prisma/seed.ts || echo "⚠️ Seed attempt finished (might already exist)" && cd ..
+npx prisma db seed || echo "⚠️ Seed attempt finished or already exists"
 
-# Start the server
+# 3. Start the server
 echo "🟢 Starting server..."
-cd backend && node dist/index.js
+# Using the absolute path to the compiled JS
+node dist/index.js
