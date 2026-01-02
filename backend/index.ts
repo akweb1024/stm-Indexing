@@ -13,12 +13,14 @@ import { syncJournalPapers } from './services/wpSync';
 
 
 dotenv.config();
+const rawUrl = process.env.DATABASE_URL || '';
+const dbUrl = rawUrl.startsWith('postgres://') ? rawUrl.replace('postgres://', 'postgresql://') : rawUrl;
 
 const app = express();
 const prisma = new PrismaClient({
     datasources: {
         db: {
-            url: process.env.DATABASE_URL
+            url: dbUrl
         }
     }
 } as any);

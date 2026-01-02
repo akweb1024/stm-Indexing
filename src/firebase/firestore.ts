@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5050/api';
+const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:5050/api');
 
 export const getDocument = async <T>(collectionName: string, docId: string): Promise<T | null> => {
   const response = await fetch(`${API_URL}/${collectionName}/${docId}`);

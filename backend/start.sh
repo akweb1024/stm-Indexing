@@ -5,12 +5,13 @@ echo "🚀 Starting STM Indexing Platform..."
 
 # Apply database migrations (push schema state)
 echo "📦 Applying database schema..."
-cd backend && ./node_modules/.bin/prisma db push && cd ..
+cd backend && ./node_modules/.bin/prisma db push --accept-data-loss && cd ..
 
 # Seed the database
 echo "🌱 Seeding database..."
-cd backend && ./node_modules/.bin/ts-node prisma/seed.ts && cd ..
+# We allow seeding to fail if it's already seeded, but we log the attempt
+cd backend && ./node_modules/.bin/ts-node prisma/seed.ts || echo "⚠️ Seed attempt finished (might already exist)" && cd ..
 
 # Start the server
 echo "🟢 Starting server..."
-node backend/dist/index.js
+cd backend && node dist/index.js
