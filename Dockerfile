@@ -22,7 +22,7 @@ COPY --from=deps /app/backend/node_modules ./backend/node_modules
 COPY backend ./backend
 
 # Generate Prisma Client and build
-RUN cd backend && npx prisma generate && npm run build
+RUN cd backend && ./node_modules/.bin/prisma generate && npm run build
 
 # Build frontend
 FROM base AS frontend-builder
@@ -38,6 +38,8 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=5050
 
+RUN apk add --no-cache curl
+
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nodejs
 
@@ -46,6 +48,7 @@ COPY --from=backend-builder --chown=nodejs:nodejs /app/backend/dist ./backend/di
 COPY --from=backend-builder --chown=nodejs:nodejs /app/backend/node_modules ./backend/node_modules
 COPY --from=backend-builder --chown=nodejs:nodejs /app/backend/package.json ./backend/package.json
 COPY --from=backend-builder --chown=nodejs:nodejs /app/backend/prisma ./backend/prisma
+COPY --from=backend-builder --chown=nodejs:nodejs /app/backend/prisma.config.ts ./backend/prisma.config.ts
 
 # Copy frontend build
 COPY --from=frontend-builder --chown=nodejs:nodejs /app/dist ./dist
@@ -60,7 +63,7 @@ EXPOSE 5050
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:5050/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+  CMD curl -f http://127.0.0.1:5050/health || exit 1
 
 # Start the application
 CMD ["./start.sh"]

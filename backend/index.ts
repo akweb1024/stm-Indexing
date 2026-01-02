@@ -15,7 +15,13 @@ import { syncJournalPapers } from './services/wpSync';
 dotenv.config();
 
 const app = express();
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+    datasources: {
+        db: {
+            url: process.env.DATABASE_URL
+        }
+    }
+} as any);
 const port = process.env.PORT || 5050;
 
 // Create HTTP server for Socket.IO
